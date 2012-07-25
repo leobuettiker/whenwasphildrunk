@@ -75,6 +75,6 @@ class MainHandler(webapp2.RequestHandler):
         self.response.out.write("<center><h1>Phil "+word+"!</h1>")
         self.response.out.write("<p>"+time.strftime('At the %d, %h %Y',beers[0])+" with "+str(round(promile/10, 4))+" percent <a href=\"http://en.wikipedia.org/wiki/Blood_alcohol_content\">blood alcohol content.</a></p>")
         self.response.out.write("<br /><img src=\""+lastbeerPic+"\" alt=\"last beer of phil\" /></center>")
-        self.response.out.write("<a href=\"https://github.com/you\"><img style=\"position: absolute; top: 0; right: 0; border: 0;\" src=\"https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png\" alt=\"Fork me on GitHub\"></a>")
+        self.response.out.write("<a href=\"https://github.com/leobuettiker/whenwasphildrunk\"><img style=\"position: absolute; top: 0; right: 0; border: 0;\" src=\"https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png\" alt=\"Fork me on GitHub\"></a>")
 
 app = webapp2.WSGIApplication([('/', MainHandler)], debug=True)
