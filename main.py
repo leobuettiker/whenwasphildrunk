@@ -29,7 +29,7 @@ class MainHandler(webapp2.RequestHandler):
         promile = 0
         
         self.response.out.write("<!--")
-        for row in d.entries:
+        for row in d.entries:		
             article = row['description'].encode('utf-8');
             pictureUrl = re.search("(?P<url>https?://[^\s\"]+)", article).group("url")
             result = urlfetch.fetch(pictureUrl)
@@ -42,26 +42,31 @@ class MainHandler(webapp2.RequestHandler):
                 if 'DateCreated' in meta:
                     #date like 2012:07:18 17:35:56
                     date = time.strptime(meta['DateCreated'], "%Y:%m:%d %H:%M:%S")
-                    self.response.out.write(date)
-                    if lastbeer == None:
-                        lastbeer = date
-                        lastbeerPic = pictureUrl
-                        promile += alcoholBeer / (0.7*weightPhil)
-                    else:
-                        delta = abs(time.mktime(lastbeer) - time.mktime(date))
-                        self.response.out.write("since the last beer: "+str(delta))
-                        if delta > 12 * 60 * 60:
-                            break;
-                        promile += alcoholBeer / (0.7*weightPhil)
-                        if delta > 2 * 60 * 60:
-                            timeToReduceAlcohol = (delta - 2 * 60 * 60) #for two hours there will be no reduction of blood alcohol content
-                            reducedAlcoholByHourInGram = 0.1 * weightPhil
-                            reducedAlcoholSinceLastBeer = delta/3600 * reducedAlcoholByHourInGram * 0.08
-                            if reducedAlcoholSinceLastBeer <  alcoholBeer / (0.7*weightPhil):
-                                promile += alcoholBeer / (0.7*weightPhil) - reducedAlcoholSinceLastBeer
+                else:
+                    #fetching the tiem from the image metadata failed. so we take the published
+                    #date from the rss feed
+                    date = row.published_parsed
                     
-                    self.response.out.write("current promille: "+str(promile))
-                    beers.append(date)
+                self.response.out.write(date)
+                if lastbeer == None:
+                    lastbeer = date
+                    lastbeerPic = pictureUrl
+                    promile += alcoholBeer / (0.7*weightPhil)
+                else:
+                    delta = abs(time.mktime(lastbeer) - time.mktime(date))
+                    self.response.out.write("since the last beer: "+str(delta))
+                    if delta > 12 * 60 * 60:
+                        break;
+                    promile += alcoholBeer / (0.7*weightPhil)
+                    if delta > 2 * 60 * 60:
+                        timeToReduceAlcohol = (delta - 2 * 60 * 60) #for two hours there will be no reduction of blood alcohol content
+                        reducedAlcoholByHourInGram = 0.1 * weightPhil
+                        reducedAlcoholSinceLastBeer = delta/3600 * reducedAlcoholByHourInGram * 0.08
+                        if reducedAlcoholSinceLastBeer <  alcoholBeer / (0.7*weightPhil):
+                            promile += alcoholBeer / (0.7*weightPhil) - reducedAlcoholSinceLastBeer
+                    
+                self.response.out.write("current promille: "+str(promile))
+                beers.append(date)
             articles.append(pictureUrl)	
         
         self.response.out.write("-->")
@@ -73,7 +78,7 @@ class MainHandler(webapp2.RequestHandler):
                 break
         
         self.response.out.write("<center><h1>Phil "+word+"!</h1>")
-        self.response.out.write("<p>"+time.strftime('At the %d, %h %Y',beers[0])+" with "+str(round(promile/10, 4))+" percent <a href=\"http://en.wikipedia.org/wiki/Blood_alcohol_content\">blood alcohol content.</a></p>")
+        self.response.out.write("<p>"+time.strftime('At the %d, %b %Y',beers[0])+" with "+str(round(promile/10, 4))+" percent <a href=\"http://en.wikipedia.org/wiki/Blood_alcohol_content\">blood alcohol content.</a></p>")
         self.response.out.write("<br /><img src=\""+lastbeerPic+"\" alt=\"last beer of phil\" /></center>")
         self.response.out.write("<a href=\"https://github.com/leobuettiker/whenwasphildrunk\"><img style=\"position: absolute; top: 0; right: 0; border: 0;\" src=\"https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png\" alt=\"Fork me on GitHub\"></a>")
 
